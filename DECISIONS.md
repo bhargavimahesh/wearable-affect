@@ -18,8 +18,38 @@
   other for training, testing, etc. Changes may become intraceable and mistakes 
   may get carried forward.
 
+## 2026-09-29
+- Binary classification of stress: stress vs. non-stress. 
+  Stress is label 2. 
+  Non-stress is baseline (1) plus amusement (3). 
+  Everything else is dropped: transitions (0), meditation (4), and the "ignore" labels (5–7).
+- Why: matches the binary task defined in the original WESAD paper, so results can be directly compared.
+- Extension: including meditation as non-stress too.
+
+- Window length: 60-second windows, starting every 30 seconds (50% overlap)
+  Trade-off between sufficient information in a sample vs sufficient inputs for training.
+  EDA and heart rate variability change slowly, so very short windows don't 
+  contain enough of the response; about 60 seconds is also common in the stress literature.
+- Overlapping windows are strongly correlated, but harmless as we use LOSO.
+
+- Windows belong to a single condition; "pure" windows. Clean data.
+
+
+
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
 - Open the project folder itself in VS Code, otherwise it won't find .venv.
-- EDA: It rises during the stress condition, which is the classic SNS response. But EDA usually doesn't drop back immediately after the stress condition ends; it recovers slowly. So a window taken just after stress can still look stressed, even though its label says otherwise. Second, the absolute EDA level differs a lot between people. One person's "calm" can be higher than another's "stressed" - strong argument for normalising per person
+- EDA: It rises during the stress condition, which is the classic SNS response. But EDA doesn't 
+  drop back immediately after the stress condition ends; it recovers slowly. So a window just 
+  after stress can still look stressed, even though its label says otherwise. 
+  Second, the absolute EDA level differs a lot between people. 
+  One person's "calm" can be higher than another's "stressed" - strong argument for normalising per person
+- Sampling rate of Labels is 700. 
+- Better to define Windows in *seconds*, not samples. Each signal has different Fs.
+- Integers are better (seconds instead of minutes)
+- 60-sec Windows (64 Hz) are for analysis. It does not matter what the PaPaGei expects (10-sec segments, 125 Hz). 
+  An input adapter is needed later. Only need to ensure that the segments are multiples of the other and not a huge info loss.
 
+# Todo
+- Classes are imabalanced. Balance or choose appropriate metric
+- 
