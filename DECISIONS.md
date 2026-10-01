@@ -34,6 +34,20 @@
 
 - Windows belong to a single condition; "pure" windows. Clean data.
 
+## 2026-09-30
+- Neurokit vs. own feature extraction = NeuroKit2
+- Why: We are working with simple features and lower frequences, NeuroKit might be an overkill and creates an overhead 
+  as a dependency. But since we do not want to change later, we could use NeuroKit2 as it has validated methods.
+- Neurokit does not use EDA cleaning at frequencies below 6Hz. We have 4Hz.
+
+- Signal preprocessing needs to be performed on each segment.
+- Why: because in production, there will be one window at a time instead of th ewhole recording. 
+- This is a problem beecause model would be trained on differently prepared data.
+- This is called training skew.
+
+
+
+
 
 
 # Lessons
@@ -51,5 +65,5 @@
   An input adapter is needed later. Only need to ensure that the segments are multiples of the other and not a huge info loss.
 
 # Todo
-- Classes are imabalanced. Balance or choose appropriate metric
+- Classes are imabalanced (stress class fraction 29%). Balance or choose appropriate metric
 - 
