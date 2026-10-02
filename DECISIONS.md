@@ -36,6 +36,8 @@
 
 ## 2026-09-30
 - Neurokit vs. own feature extraction = NeuroKit2
+- Simple handcrafted features first (EDA, TEMP, ACC, HR/HRV) 
+- NeuroKit2 for PPG peaks and EDA decomposition (validated methods)
 - Why: We are working with simple features and lower frequences, NeuroKit might be an overkill and creates an overhead 
   as a dependency. But since we do not want to change later, we could use NeuroKit2 as it has validated methods.
 - Neurokit does not use EDA cleaning at frequencies below 6Hz. We have 4Hz.
@@ -45,10 +47,17 @@
 - This is a problem beecause model would be trained on differently prepared data.
 - This is called training skew.
 
+## 01.10.2026
+- Wrist BVP is often noisy. When a window has too few detected beats, we return NaN
+- Smoothmedian EDA decomposition, because a high-pass filter is unreliable on 60 s windows.
+- Missing heart features are NaN, not imputed
 
+## 02.10.2026
+- SCR detection uses an absolute 0.01 µS threshold. NeuroKit2's default relative threshold counted sensor noise as SCRs in calm windows and reversed the stress effect
+- Issue: 40 SCRs per minute in non-stress, meaning one SCR every 1.5 seconds. Stress phase had lesser.
+- Neurokit2's SCR detector's default peak detection threshold is amplitude_min=0.1 (anything above 10% of the largest peak in that window). In non-stress window, largest peak could be sensor artifact. small noises = more peaks.  Therefore absolute threshold of 5.5Usec. 
 
-
-
+- EDA: there were more SCR peaks in non-stress than stress
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
@@ -63,6 +72,7 @@
 - Integers are better (seconds instead of minutes)
 - 60-sec Windows (64 Hz) are for analysis. It does not matter what the PaPaGei expects (10-sec segments, 125 Hz). 
   An input adapter is needed later. Only need to ensure that the segments are multiples of the other and not a huge info loss.
+- Close all notebooks before installing a package or commit everything.
 
 # Todo
 - Classes are imabalanced (stress class fraction 29%). Balance or choose appropriate metric

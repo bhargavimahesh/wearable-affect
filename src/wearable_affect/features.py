@@ -8,7 +8,7 @@ from wearable_affect.data import WRIST_FS
 from wearable_affect.windows import Window
 
 HEART_FEATURES = ["hr_mean", "hr_std", "hrv_sdnn", "hrv_rmssd"]
-
+SCR_MIN_AMPLITUDE_US = 0.01  # smallest phasic rise counted as an SCR, in microsiemens
 
 def _slope(x: np.ndarray, fs: int) -> float:
     """Slope of a straight-line fit through the signal, in units per second."""
@@ -43,14 +43,15 @@ def eda_features(eda: np.ndarray, fs: int) -> dict[str, float]:
     decomposed = nk.eda_phasic(eda, sampling_rate=fs, method="smoothmedian")
     tonic = decomposed["EDA_Tonic"].to_numpy()
     phasic = decomposed["EDA_Phasic"].to_numpy()
-
     try:
-        _, info = nk.eda_peaks(phasic, sampling_rate=fs)
+        # amplitude_min=0 turns off NeuroKit2's *relative* threshold; we apply an absolute one below.
+        _, info = nk.eda_peaks(phasic, sampling_rate=fs, amplitude_min=0)
         amplitudes = np.asarray(info["SCR_Amplitude"], dtype=float)
-        amplitudes = amplitudes[~np.isnan(amplitudes)]
     except Exception:
         # No detectable responses (e.g. a flat segment) counts as zero SCRs.
         amplitudes = np.array([])
+    amplitudes = amplitudes[amplitudes >= SCR_MIN_AMPLITUDE_US]  # also drops NaN
+
 
     return {
         "scl_mean": float(np.mean(tonic)),

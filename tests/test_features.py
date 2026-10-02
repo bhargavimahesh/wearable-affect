@@ -51,3 +51,9 @@ def test_simulated_responses_are_detected():
     eda = nk.eda_simulate(duration=60, sampling_rate=4, scr_number=4, random_state=0)
     features = extract_features(fake_window(eda=eda))
     assert features["scr_count"] >= 2
+
+def test_calm_noisy_eda_has_few_responses():
+    rng = np.random.default_rng(0)
+    eda = 1.3 + rng.normal(0, 0.003, 60 * 4)  # calm level with small sensor noise
+    features = extract_features(fake_window(eda=eda))
+    assert features["scr_count"] <= 5  # real resting SCR rates are a few per minute
