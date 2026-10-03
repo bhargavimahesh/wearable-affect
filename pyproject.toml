@@ -5,11 +5,13 @@ description = "Stress detection from wrist-worn wearable signals (WESAD), from f
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "lightgbm>=4.7.0",
     "matplotlib>=3.11.2",
     "neurokit2>=0.2.12",
     "numpy>=2.4.6",
     "pandas>=3.0.6",
     "pyarrow>=25.0.1",
+    "scikit-learn>=1.9.1",
     "scipy>=1.17.1",
 ]
 
