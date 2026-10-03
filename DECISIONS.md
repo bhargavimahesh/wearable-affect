@@ -146,5 +146,8 @@
 - Averages hide failures: always look at per-subject results.
 - High AUROC with low F1 means the model ranks correctly but the threshold is wrong.
 - When an optimum lands on the edge of a search grid, the true optimum is probably beyond it.
+- MLflow goes in the dev group because it's used for running experiments, not for serving predictions.
 
-
+# Questions
+- what kinds of personalization for production?
+- how to know this threshold for a new subject?

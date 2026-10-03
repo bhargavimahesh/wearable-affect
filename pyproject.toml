@@ -25,5 +25,6 @@ dev = [
     "ipykernel>=7.3.0",
     "jupyter>=1.1.1",
     "matplotlib>=3.11.2",
+    "mlflow>=3.16.1",
     "pytest>=9.1.1",
 ]
