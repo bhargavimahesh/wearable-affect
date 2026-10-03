@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from wearable_affect.evaluation import feature_columns, loso_evaluate
 from wearable_affect.models import make_dummy, make_logreg
-
+from wearable_affect.evaluation import feature_columns, loso_evaluate, loso_predict
 
 def fake_feature_table(informative: bool) -> pd.DataFrame:
     """4 subjects x 20 windows; one feature either separates the classes or is pure noise."""
@@ -44,3 +43,10 @@ def test_majority_baseline_scores_at_chance():
     results = loso_evaluate(fake_feature_table(informative=True), make_dummy)
     assert np.allclose(results["balanced_accuracy"], 0.5)
     assert np.allclose(results["auroc"], 0.5)
+
+
+def test_every_window_gets_exactly_one_prediction():
+    df = fake_feature_table(informative=True)
+    preds = loso_predict(df, make_logreg)
+    assert len(preds) == len(df)
+    assert not preds.duplicated(["subject_id", "start_s"]).any()
