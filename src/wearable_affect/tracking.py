@@ -24,7 +24,7 @@ def _git_info() -> dict[str, str]:
 
     return {
         "git_commit": git("rev-parse", "HEAD"),
-        "git_dirty": str(bool(git("status", "--porcelain"))),
+        "git_dirty": str(bool(git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"))),
     }
 
 
