@@ -13,6 +13,7 @@ dependencies = [
     "pyarrow>=25.0.1",
     "scikit-learn>=1.9.1",
     "scipy>=1.17.1",
+    "torch>=2.14.1",
 ]
 
 
@@ -28,3 +29,10 @@ dev = [
     "mlflow>=3.16.1",
     "pytest>=9.1.1",
 ]
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]

@@ -120,6 +120,51 @@
 - **Why:** Choosing settings by best LOSO score uses the test subjects to decide, inflating results.
   Proper tuning needs nested cross-validation.
 
+
+- MLflow for experiment tracking, with a local SQLite store
+- **Decision:** Every LOSO evaluation runs through `run_loso_experiment`, which logs to MLflow.
+  Records go in `mlflow.db` (SQLite) and artifact files in `mlruns/`, both in the project root.
+- **Why:** Many variants are coming (personalisation, foundation models). Without tracking, results
+  end up scattered across notebook outputs, and no number can be traced back to the code and
+  settings that produced it.
+- **Alternatives:** Manual results tables; Weights & Biases (hosted, needs an account).
+- **Consequence:** `mlflow.db` and `mlruns/` are gitignored (generated output). Results worth
+  keeping publicly go into FINDINGS.md.
+
+- Each run logs parameters, model settings, metrics, per-subject results and predictions
+- **Why:** Mean/std metrics are for comparing runs; per-subject results and window-level
+  predictions allow error analysis (like the S14 investigation) on any past run without retraining.
+- **Consequence:** A `features` parameter labels the feature-set version (e.g. `neurokit_v1`),
+  so runs can be filtered by feature version.
+
+- Artifact location fixed to the project root
+- **Why:** By default MLflow saves artifacts relative to wherever the code runs, so notebook runs
+  would put them in `notebooks/mlruns`. Same principle as DEFAULT_DATA_DIR: file locations must
+  never depend on the working directory.
+
+- Runs are tagged with the Git commit; code is committed before experiments
+- **Why:** The commit hash identifies exactly what ran. `git_dirty` only checks `src/` and the
+  dependency files, because notebooks change every time they run.
+- **Working rule:** Commit code before running experiments, so each run's commit hash identifies
+  exactly what ran.
+
+### Why foundation models when baseline models already work well (AUROC=0.97), and personalization is the problem instead?
+- Foundation model evaluated for average performance, label efficiency (fewer training subjects), robustness (high-motion windows), and EDA non-responders. A null result on average is a valid outcome.
+- "PaPaGei matched but didn't beat handcrafted features on WESAD; it helped when training data was scarce and on high-motion windows, and here's why"... is valuable
+
+### PaPaGei or Pulse-PPG?
+- PaPaGei is trained on clinical datasets, so we need to handle dataset domain shift (VitalDB, MIMIC-III, and MESA,
+typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
+- Pulse-PPG might be a better fit as it is pre-trained on field data, might be more robust for motion
+- But it requires 4-minute segments (add history to 60-sec outputs - may lead to impure labels, feed only 60 sec, or redo baseline models with 4-min segments - will lead to very few inputs)
+- We could use both: clinical-pretrained vs. field-pretrained foundation models on wrist PPG
+- We continue with PaPaGEi
+
+### Papager weights only
+- papagei is archived
+
+
+
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
 - Open the project folder itself in VS Code, otherwise it won't find .venv.
@@ -147,7 +192,17 @@
 - High AUROC with low F1 means the model ranks correctly but the threshold is wrong.
 - When an optimum lands on the edge of a search grid, the true optimum is probably beyond it.
 - MLflow goes in the dev group because it's used for running experiments, not for serving predictions.
+- MLflow 3 lists classic runs under 'Training runs'. When a web UI seems empty, check the server log to see whether data was actually requested. http://127.0.0.1:5000/#/experiments/1/runs 
 
 # Questions
 - what kinds of personalization for production?
 - how to know this threshold for a new subject?
+
+# todos
+### Foundation models: swap one modality at a time
+- **Why:** Keeping everything else identical (windows, splits, other features, models) means any
+  change in performance comes from that foundation model alone. PaPaGei (BVP) first, then UME (EDA).
+
+### Check pretraining data for WESAD before using a foundation model
+- **Why:** If WESAD was in the pretraining data, the model has seen our test subjects, and LOSO
+  results would be optimistic.
