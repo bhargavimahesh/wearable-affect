@@ -32,3 +32,30 @@
   (S7, S13), but cannot create an absent response (S14); there, cardiac features must carry the
   signal — an argument for multimodal models.
 - Probability calibration needs attention before the API returns probabilities to users.
+
+## PaPaGei-S (LOSO, LightGBM / logistic regression)
+- PPG only: PaPaGei embeddings (F1 0.77–0.78, AUROC 0.87–0.88) roughly match but do not beat
+  4 handcrafted heart features (F1 0.78–0.80, AUROC 0.89). Plausible cause: clinical
+  pretraining data; stress in WESAD appears mainly as a heart-rate change.
+- Full model: logistic regression gets worse with PaPaGei (F1 0.83 -> 0.81, AUROC 0.97 -> 0.92),
+  consistent with overfitting to 512 dimensions. LightGBM: F1 up (0.85 -> 0.88) but AUROC down
+  (0.98 -> 0.95), so the F1 gain likely reflects threshold effects, not better separation.
+  Per-subject analysis pending.
+- Per subject (LightGBM, all handcrafted vs non-heart handcrafted + PaPaGei):
+  - Mean F1 gain (0.85 -> 0.88) comes almost entirely from two subjects. S10: F1 0.74 -> 0.97
+    with AUROC 1.00 in both (pure threshold effect). S14: F1 0.42 -> 0.67 but AUROC 0.91 -> 0.68.
+  - AUROC: 3 subjects better, 8 worse, 4 tied at 1.00. Sign test excluding ties: p ≈ 0.23
+    (not significant).
+  - S14 (EDA non-responder) depends on cardiac information; replacing handcrafted heart features
+    with PaPaGei removed the signal the model relied on, and ranking dropped sharply.
+- Conclusion: no evidence PaPaGei-S improves on handcrafted heart features on WESAD; F1 gains are
+  threshold effects. Likely cause: clinical pretraining (domain shift to wrist PPG).
+- Lesson: F1 gains can hide ranking losses; always check AUROC per subject alongside F1.
+
+## Manipulation check using self-reported arousal and valence
+- Across subjects, self-reported arousal change was not related to SCL change (Spearman
+  ρ = 0.09, p = 0.74) or to model AUROC (ρ = 0.18, p = 0.51). With n = 15, only strong
+  correlations (|ρ| >= 0.5) would be detectable, and SAM is a coarse 1–9 scale with ceiling
+  effects, so this is absence of evidence, not evidence of absence.
+
+

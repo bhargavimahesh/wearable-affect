@@ -74,3 +74,13 @@ def run_loso_experiment(
             mlflow.log_artifacts(str(tmp))
 
     return results
+
+def load_run_results(run_name: str, experiment: str = "wesad-stress") -> pd.DataFrame:
+    """Per-subject results saved with the most recent run of this name."""
+    mlflow.set_tracking_uri(TRACKING_URI)
+    runs = mlflow.search_runs(experiment_names=[experiment])
+    matching = runs.loc[runs["tags.mlflow.runName"] == run_name, "run_id"]
+    if matching.empty:
+        raise ValueError(f"No run named {run_name!r} in experiment {experiment!r}")
+    path = mlflow.artifacts.download_artifacts(run_id=matching.iloc[0], artifact_path="per_subject.csv")
+    return pd.read_csv(path).set_index("subject_id")

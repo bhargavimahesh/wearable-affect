@@ -163,7 +163,20 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 ### Papager weights only
 - papagei is archived
 
+### Manipulation check (self-reports)
+- the stress manipulation "worked" for a person if their self-reported arousal was higher after the TSST than after baseline
+- Why: S14's EDA did not vary much (0.3) but HRV features did. Self-reports show that the valence was the lowest and arousal was the highest during Stress phase. But did stress manipulation work on everyone?
+- Criterion fixed before looking: stress manipulation "worked" if self-reported arousal (SAM)
+  after TSST > after baseline.
+- Result: all 15 subjects reported higher arousal (change +1 to +7) and mostly lower valence.
+  Labels are valid at the level of self-report.
+- Subjective and electrodermal responses dissociate for some people: S17 reported the strongest
+  stress (arousal 2 -> 9, valence 7 -> 1) but SCL dropped (1.28 -> 1.05 µS); S14 reported strong
+  stress (arousal 2 -> 7) with almost no SCL change (0.29 -> 0.34 µS).
+- Weakest self-reported responders (S6, S9: +1) were not the hardest to classify (AUROC 0.92,
+  1.00). Self-reported intensity does not predict physiological detectability.
 
+### 
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
