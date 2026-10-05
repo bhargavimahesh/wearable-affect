@@ -58,4 +58,23 @@
   correlations (|ρ| >= 0.5) would be detectable, and SAM is a coarse 1–9 scale with ceiling
   effects, so this is absence of evidence, not evidence of absence.
 
-
+## Personalisation (calibration = first minutes of each recording)
+- Success criterion (fixed in advance): mean macro F1 higher than generic at the same
+  calibration length, AND more subjects improve than get worse.
+- Baseline normalisation (subtract personal calm mean, fixed 0.5 threshold) raised mean F1 in all
+  6 model/length combinations; strongest for logistic regression (5 min: 0.839 -> 0.896).
+  AUROC barely changed (~0.97): normalisation fixes per-person level shifts, not ranking.
+- Per-subject criterion met in 5/6 combinations; 10-min logistic regression (highest mean, 0.908)
+  failed it (7 better / 7 worse). Best split 10/4; no single comparison significant with n = 15
+  (sign test p ≈ 0.18).
+- Predictions made before running held: S7 0.79 -> 0.89 and S10 0.90 -> 1.00 improved; S14
+  unchanged (EDA non-responder); S17 slightly worse.
+- Worse for S11 (0.96 -> 0.76), S9, S3. Hypothesis: the first minutes after putting on the device
+  are not representative (EDA electrode settling, participants still settling in).
+- Personal threshold (95th percentile of calibration probabilities) was worse than 0.5 in all
+  12 comparisons. Quiet sitting does not represent all non-stress states (e.g. amusement), so the
+  threshold is too low and produces false alarms; worst for LightGBM's extreme probabilities.
+  Rejected; calm-only calibration is useful for features, not for thresholds.
+- Chosen for deployment: logistic regression + baseline normalisation, 5-min calibration, fixed
+  0.5 threshold (F1 0.896, 9 better / 5 worse). Selected after seeing results among 12 variants,
+  so its score is somewhat optimistic.

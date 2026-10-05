@@ -184,6 +184,39 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - Not using PAPAGei as it did not yield consistent improvement 
 - Variants: 2 normalisation options × 2 threshold options × 3 calibration lengths (2, 5, 10 minutes) × 2 models = 24 runs.
 
+## Personalisation
+
+### Calibration = first minutes of each recording; never scored
+- **Why:** Matches a real product (the first minutes after putting the device on) and needs no
+  stress labels from the new user. Calibration windows are excluded from scoring, so generic and
+  personalised models are evaluated on exactly the same windows. The code checks that
+  calibration windows are calm and raises an error otherwise.
+
+### Baseline normalisation by subtraction, per feature
+- **Why:** Expresses each feature as a change from the person's own calm state, removing
+  person-specific offsets (e.g. S7's high SCL). Subtraction, not division: some features can be
+  zero or negative (slopes, SCR counts). Per feature, so a cardiac response still counts when EDA
+  doesn't respond. Training subjects are normalised the same way, so the model learns on the
+  same kind of features it is tested on.
+
+### Success criterion fixed before running
+- **Decision:** Mean macro F1 higher than generic at the same calibration length, AND more
+  subjects improve than get worse.
+- **Why:** The best average can hide losses for many people (10-min logistic regression had the
+  highest mean but failed the per-subject test).
+
+### Personal threshold from calm data: rejected
+- **Why:** Worse than the fixed 0.5 threshold in all 12 comparisons. Quiet sitting doesn't
+  represent all non-stress states, so the threshold ends up too low. Not tuned further, to avoid
+  searching variants until one works.
+
+### Deployed configuration: logistic regression + baseline normalisation, 5 min, threshold 0.5
+- **Why:** Highest mean F1 among variants meeting the criterion (0.896, 9 better / 5 worse);
+  5 minutes is a reasonable onboarding request; logistic regression is simpler, interpretable,
+  and likely better calibrated than LightGBM.
+- **Caveat:** Chosen after seeing results among 12 variants on the same 15 subjects, so its score
+  is somewhat optimistic; an independent dataset would be needed for an unbiased estimate.
+
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
 - Open the project folder itself in VS Code, otherwise it won't find .venv.
@@ -212,7 +245,15 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - When an optimum lands on the edge of a search grid, the true optimum is probably beyond it.
 - MLflow goes in the dev group because it's used for running experiments, not for serving predictions.
 - MLflow 3 lists classic runs under 'Training runs'. When a web UI seems empty, check the server log to see whether data was actually requested. http://127.0.0.1:5000/#/experiments/1/runs 
-
+- Write success criteria and predictions down before running an experiment; it protects against
+  reinterpreting results afterwards, and makes confirmed predictions meaningful.
+- The best mean is not the most reliable choice; check how many individuals improve.
+- Compare variants only on identical test windows (here: at the same calibration length).
+- A personalisation method rests on its assumptions: if the calibration minutes are not
+  representative, normalisation makes things worse for that person.!!
+- Calm-only data can describe a person's baseline, but not where their decision threshold
+  should be.!!
+  
 # Questions
 - what kinds of personalization for production?
 - how to know this threshold for a new subject?
