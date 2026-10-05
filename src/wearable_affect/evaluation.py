@@ -32,11 +32,16 @@ def loso_predict(df: pd.DataFrame, make_model: Callable) -> pd.DataFrame:
     return pd.concat(folds, ignore_index=True)
 
 
-def score_predictions(preds: pd.DataFrame, threshold: float = 0.5) -> pd.DataFrame:
-    """Metrics per subject from window-level predictions, in numeric subject order."""
+def score_predictions(preds: pd.DataFrame, threshold: float = 0.5, threshold_column: str | None = None
+) -> pd.DataFrame:
+    """Metrics per subject from window-level predictions, in numeric subject order.
+
+    Uses one fixed `threshold` for everyone, or a per-window threshold from `threshold_column`.
+    """
     rows = []
     for subject_id, group in preds.groupby("subject_id"):
-        y_pred = (group["prob"] >= threshold).astype(int)
+        cutoff = group[threshold_column] if threshold_column else threshold
+        y_pred = (group["prob"] >= cutoff).astype(int)
         rows.append(
             {
                 "subject_id": subject_id,

@@ -36,18 +36,22 @@ def _simple_params(model) -> dict:
     }
 
 
-def run_loso_experiment(
+def log_run(
     run_name: str,
-    features: pd.DataFrame,
+    preds: pd.DataFrame,
     make_model: Callable,
+    features: pd.DataFrame,
     params: dict | None = None,
+    threshold_column: str | None = None,
     experiment: str = "wesad-stress",
 ) -> pd.DataFrame:
-    """Run LOSO evaluation for one model and record everything about it in MLflow."""
+    """Score window-level predictions and record everything about the run in MLflow."""
     mlflow.set_tracking_uri(TRACKING_URI)
     if mlflow.get_experiment_by_name(experiment) is None:
         mlflow.create_experiment(experiment, artifact_location=ARTIFACT_DIR.as_uri())
     mlflow.set_experiment(experiment)
+
+    results = score_predictions(preds, threshold_column=threshold_column)
 
     with mlflow.start_run(run_name=run_name):
         mlflow.set_tags(_git_info())
@@ -60,9 +64,6 @@ def run_loso_experiment(
         })
         mlflow.log_params({f"model.{k}": v for k, v in _simple_params(make_model()).items()})
 
-        preds = loso_predict(features, make_model)
-        results = score_predictions(preds)
-
         for metric in METRICS:
             mlflow.log_metric(f"{metric}_mean", results[metric].mean())
             mlflow.log_metric(f"{metric}_std", results[metric].std())
@@ -74,6 +75,18 @@ def run_loso_experiment(
             mlflow.log_artifacts(str(tmp))
 
     return results
+
+
+def run_loso_experiment(
+    run_name: str,
+    features: pd.DataFrame,
+    make_model: Callable,
+    params: dict | None = None,
+    experiment: str = "wesad-stress",
+) -> pd.DataFrame:
+    """Run generic LOSO evaluation for one model and record it in MLflow."""
+    preds = loso_predict(features, make_model)
+    return log_run(run_name, preds, make_model, features, params, experiment=experiment)
 
 def load_run_results(run_name: str, experiment: str = "wesad-stress") -> pd.DataFrame:
     """Per-subject results saved with the most recent run of this name."""

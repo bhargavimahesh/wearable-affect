@@ -161,7 +161,7 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - We continue with PaPaGEi
 
 ### Papager weights only
-- papagei is archived
+- papagei is archived; pretraining not needed
 
 ### Manipulation check (self-reports)
 - the stress manipulation "worked" for a person if their self-reported arousal was higher after the TSST than after baseline
@@ -176,7 +176,13 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - Weakest self-reported responders (S6, S9: +1) were not the hardest to classify (AUROC 0.92,
   1.00). Self-reported intensity does not predict physiological detectability.
 
-### 
+### Personalization approaches
+- Two approaches, both using only the calm windows 
+- Approach 1: Baseline subtraction (not division, may end up dividing by zero), Each feature is normalised separately.
+- Approach 2: After training, the model scores the test person's calibration windows. Their threshold is set at the 95th percentile of those calm probabilities: "flag stress when a probability is higher than 95% of your calm moments."
+- Success criterion: a personalised variant counts as an improvement if its mean macro F1 is higher than the generic model's at the same calibration length, and more subjects improve than get worse (ties excluded).
+- Not using PAPAGei as it did not yield consistent improvement 
+- Variants: 2 normalisation options × 2 threshold options × 3 calibration lengths (2, 5, 10 minutes) × 2 models = 24 runs.
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
