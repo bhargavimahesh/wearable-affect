@@ -88,12 +88,21 @@ def run_loso_experiment(
     preds = loso_predict(features, make_model)
     return log_run(run_name, preds, make_model, features, params, experiment=experiment)
 
-def load_run_results(run_name: str, experiment: str = "wesad-stress") -> pd.DataFrame:
-    """Per-subject results saved with the most recent run of this name."""
+def _run_artifact(run_name: str, artifact: str, experiment: str = "wesad-stress") -> Path:
+    """Download a file saved with the most recent run of this name; return its local path."""
     mlflow.set_tracking_uri(TRACKING_URI)
     runs = mlflow.search_runs(experiment_names=[experiment])
     matching = runs.loc[runs["tags.mlflow.runName"] == run_name, "run_id"]
     if matching.empty:
         raise ValueError(f"No run named {run_name!r} in experiment {experiment!r}")
-    path = mlflow.artifacts.download_artifacts(run_id=matching.iloc[0], artifact_path="per_subject.csv")
-    return pd.read_csv(path).set_index("subject_id")
+    return Path(mlflow.artifacts.download_artifacts(run_id=matching.iloc[0], artifact_path=artifact))
+
+
+def load_run_results(run_name: str, experiment: str = "wesad-stress") -> pd.DataFrame:
+    """Per-subject results saved with a run."""
+    return pd.read_csv(_run_artifact(run_name, "per_subject.csv", experiment)).set_index("subject_id")
+
+
+def load_run_predictions(run_name: str, experiment: str = "wesad-stress") -> pd.DataFrame:
+    """Window-level predictions saved with a run."""
+    return pd.read_csv(_run_artifact(run_name, "predictions.csv", experiment))

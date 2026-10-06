@@ -78,3 +78,14 @@
 - Chosen for deployment: logistic regression + baseline normalisation, 5-min calibration, fixed
   0.5 threshold (F1 0.896, 9 better / 5 worse). Selected after seeing results among 12 variants,
   so its score is somewhat optimistic.
+
+## Probability calibration (5-min personalised models, pooled LOSO predictions)
+- Logistic regression is well calibrated: close to the diagonal, mean predicted 0.359 vs actual
+  stress rate 0.343, Brier 0.076 (reference 0.225). Slight overconfidence at the top
+  (predicted ~0.93 -> observed ~0.82). class_weight="balanced" did not noticeably inflate
+  probabilities.
+- LightGBM has a similar Brier (0.075) but is confidently wrong at the low end: windows
+  predicted ~0.06 were 41% stress. The Brier score hides this; the reliability diagram shows it.
+- Calibration is pooled across subjects; per-person calibration can't be assessed with ~60
+  windows each.
+- Decision: no recalibration needed; logistic regression confirmed for deployment.

@@ -217,6 +217,10 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - **Caveat:** Chosen after seeing results among 12 variants on the same 15 subjects, so its score
   is somewhat optimistic; an independent dataset would be needed for an unbiased estimate.
 
+## Calibration
+- No probability recalibration: the chosen logistic regression is well calibrated on LOSO predictions (Brier 0.076)
+
+
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
 - Open the project folder itself in VS Code, otherwise it won't find .venv.
