@@ -46,11 +46,20 @@ class StressDetector:
         features = pd.DataFrame([features_from_signals(w) for w in windows])[self.feature_names]
         return features.mean().to_dict()
 
+    def predict_with_quality(
+        self, window_signals: dict[str, np.ndarray], baseline: dict[str, float]
+    ) -> tuple[float, list[str]]:
+        """Stress probability for one 60 s window, plus the names of features that couldn't be computed."""
+        raw = features_from_signals(window_signals)
+        features = pd.DataFrame([raw])[self.feature_names]
+        relative = features - pd.Series(baseline)[self.feature_names]
+        prob = float(self.model.predict_proba(relative)[0, 1])
+        missing = sorted(name for name in self.feature_names if np.isnan(raw[name]))
+        return prob, missing
+
     def predict_proba(self, window_signals: dict[str, np.ndarray], baseline: dict[str, float]) -> float:
         """Probability of stress for one 60 s window, relative to the person's baseline."""
-        features = pd.DataFrame([features_from_signals(window_signals)])[self.feature_names]
-        relative = features - pd.Series(baseline)[self.feature_names]
-        return float(self.model.predict_proba(relative)[0, 1])
+        return self.predict_with_quality(window_signals, baseline)[0]
 
     def save(self, path: Path) -> None:
         joblib.dump(self, path)

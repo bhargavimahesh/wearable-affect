@@ -96,3 +96,4 @@
   minutes after putting on the device are unrepresentative.
 - Amusement windows reach 0.28–0.50: aroused non-stress states get moderate probabilities, which
   explains why calm-based personal thresholds failed.
+

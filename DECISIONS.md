@@ -237,6 +237,24 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - **Why:** Model, feature order and threshold travel together. The scikit-learn version is recorded
   and checked at load time, because saved models are only reliable with the same version.
 
+### API: /health, /calibrate, /predict with FastAPI
+- **Why:** Typed request validation (Pydantic) and automatic interactive documentation.
+
+### Stateless API: the client keeps the baseline and sends it with each prediction
+- **Why:** The server stores no personal data and no user state; any number of copies can answer any
+  request.
+
+### Validate all input at the boundary
+- **Why:** A model given malformed data usually returns plausible nonsense rather than crashing.
+  Structural problems -> 422; valid but unacceptable requests -> 400, always with a clear message.
+
+### Missing features reported in every prediction
+- **Why:** A first signal-quality indicator; e.g. a flat pulse (lost skin contact) means no heart
+  features, which the client should know.
+
+### Model location from the MODEL_PATH environment variable
+- **Why:** The same code runs on a laptop and in a container without changes.
+
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
