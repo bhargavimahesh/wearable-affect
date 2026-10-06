@@ -89,3 +89,10 @@
 - Calibration is pooled across subjects; per-person calibration can't be assessed with ~60
   windows each.
 - Decision: no recalibration needed; logistic regression confirmed for deployment.
+
+## Final detector (demonstration on S2, which was in training)
+- Serving pipeline works end to end from the saved file: stress windows 0.72–1.0, baseline mostly ~0.
+- First baseline window 0.58 (inside the calibration period): supports the hypothesis that the first
+  minutes after putting on the device are unrepresentative.
+- Amusement windows reach 0.28–0.50: aroused non-stress states get moderate probabilities, which
+  explains why calm-based personal thresholds failed.

@@ -220,6 +220,23 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 ## Calibration
 - No probability recalibration: the chosen logistic regression is well calibrated on LOSO predictions (Brier 0.076)
 
+## Detector
+### Final detector trained on all 15 subjects
+- **Why:** LOSO estimates how the procedure performs for a new person; the deployed model should
+  learn from all available data.
+
+### One feature function (features_from_signals) for training and serving
+- **Why:** Prevents training/serving skew. A test runs the same recording through both paths and
+  requires identical probabilities.
+
+### Stateless detector: baselines are computed and returned, not stored
+- **Why:** The service needs no memory of users, can run as many copies as needed, and keeps no
+  personal data. Where baselines live is decided in the API step.
+
+### Detector saved with joblib, including feature order and training metadata
+- **Why:** Model, feature order and threshold travel together. The scikit-learn version is recorded
+  and checked at load time, because saved models are only reliable with the same version.
+
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
