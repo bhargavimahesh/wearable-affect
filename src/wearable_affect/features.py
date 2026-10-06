@@ -62,12 +62,15 @@ def eda_features(eda: np.ndarray, fs: int) -> dict[str, float]:
     }
 
 
-def extract_features(window: Window) -> dict[str, float]:
-    """All handcrafted features for one window, as a flat name -> value dict."""
-    eda = window.signals["EDA"][:, 0]
-    temp = window.signals["TEMP"][:, 0]
-    bvp = window.signals["BVP"][:, 0]
-    acc_magnitude = np.linalg.norm(window.signals["ACC"], axis=1)
+def features_from_signals(signals: dict[str, np.ndarray]) -> dict[str, float]:
+    """All handcrafted features for one 60 s window of wrist signals, as a flat name -> value dict.
+
+    Used for both training (via extract_features) and serving, so the two can never differ.
+    """
+    eda = signals["EDA"][:, 0]
+    temp = signals["TEMP"][:, 0]
+    bvp = signals["BVP"][:, 0]
+    acc_magnitude = np.linalg.norm(signals["ACC"], axis=1)
 
     features = {}
     features.update(eda_features(eda, WRIST_FS["EDA"]))
@@ -78,6 +81,11 @@ def extract_features(window: Window) -> dict[str, float]:
     features["acc_std"] = float(np.std(acc_magnitude))
     features.update(heart_features(bvp, WRIST_FS["BVP"]))
     return features
+
+
+def extract_features(window: Window) -> dict[str, float]:
+    """All handcrafted features for one labelled window."""
+    return features_from_signals(window.signals)
 
 
 def build_feature_table(windows: list[Window]) -> pd.DataFrame:

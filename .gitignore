@@ -2,3 +2,4 @@ mlflow.db
 mlruns/
 data/
 weights/
+artifacts/
