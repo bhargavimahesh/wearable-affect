@@ -255,6 +255,37 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 ### Model location from the MODEL_PATH environment variable
 - **Why:** The same code runs on a laptop and in a container without changes.
 
+## Docker
+### Docker image: python:3.11-slim, uv with the same version as development
+- **Why:** Runs identically on the laptop and in the cloud; uv reads uv.lock exactly as it was written.
+
+### Serving image contains runtime dependencies only
+- **Decision:** PyTorch moved to an `fm` dependency group and LightGBM to `dev` (with a lazy import in
+  `make_lightgbm`, so importing `models.py` doesn't require it). The image installs with
+  --no-default-groups: no dev tools, no PyTorch, no LightGBM. Locally, default-groups keeps everything.
+- **Why:** The deployed detector (logistic regression) uses neither; the CUDA build of PyTorch alone is
+  several GB. Verified with an isolated install of runtime dependencies only.
+- **Result:** Image 280 MB compressed / 1.16 GB on disk.
+
+
+### Dependency layer before code layer
+- **Why:** Code changes rebuild in seconds, because the slow dependency layer is reused.
+
+### Container runs as a non-root user
+- **Why:** Limits what an attacker could do if the service were ever compromised.
+
+### Model baked into the image; image kept private
+- **Why:** Simple and reproducible for now. The model is derived from WESAD, so the image must not be
+  published. How CI builds get the model is decided in Step 14.
+
+### Container built and tested in GitHub Codespaces
+- **Why:** Docker can't be installed on the development laptop (managed computer). Codespaces provides
+  a Linux machine with Docker in the browser; GitHub Actions will automate the same build in Step 14.
+
+### Smoke-test script for a running API (scripts/smoke_test_api.py)
+- **Why:** One command checks health, calibration and prediction, and that the API's answer equals the
+  detector's. Reusable for the container, CI and the cloud deployment.
+
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`

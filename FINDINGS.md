@@ -97,3 +97,7 @@
 - Amusement windows reach 0.28–0.50: aroused non-stress states get moderate probabilities, which
   explains why calm-based personal thresholds failed.
 
+## Docker (built and run in a GitHub Codespace)
+- Image built from python:3.11-slim with runtime dependencies only (no dev tools, no PyTorch, no LightGBM).
+- Smoke test against the running container: /health OK, model metadata correct; served probability
+  identical to direct detector use (0.068676); single-request latency 114 ms on synthetic signals.
