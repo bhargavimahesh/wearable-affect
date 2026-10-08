@@ -292,6 +292,22 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
   representative, normalisation makes things worse for that person.!!
 - Calm-only data can describe a person's baseline, but not where their decision threshold
   should be.!!
+  - The first 5 minutes of each recording (calm baseline) were used in two tests:
+  - Baseline subtraction: the mean of each feature over the 9 calibration windows was subtracted from
+  all later windows. This improved mean macro F1 (logistic regression: 0.839 -> 0.896), though not
+  for every subject (9 better, 5 worse).
+  - Personal threshold: the model's predicted probabilities on the calibration windows were used to set
+  a person-specific threshold (their 95th percentile). This performed worse than the fixed 0.5
+  threshold in all 12 comparisons. Therefore rejected
+  - Only baseline subtraction was retained; the deployed model uses a fixed 0.5 threshold for everyone.
+- Probability calibration checks whether the model's predicted probabilities can be taken at face
+  value. E.g. for 0.8: collect all windows predicted around 0.8 and check their true labels. If about
+  80% are stress, the model is calibrated at that level; if fewer, it is overconfident; if more,
+  underconfident. Repeating this for every probability range gives the reliability diagram.
+- Calibration is separate from ranking (AUROC) and from decisions at a threshold (F1): a model can
+  rank windows well and still give probabilities that are too high or too low.
+- Training and calibration (not personal/baseline calibration but output calibration) are not the same. Training is learning weights for each feature. But calibration decribes the quality of the output and checks whether output probabilites can be taken at face value. A trained model is not always well calibrated. In this case, the logistic regression model is already well calibrated, without needing an extra step such as Platt scaling or isotonic regression. 
+- The 5-minute personal calibration is something else again: it measures a person's calm baseline, not the model's probabilities. So in this project, "calibration" can mean the person's baseline (input), the quality of the probabilities (output), or a correction step for those probabilities.
   
 # Questions
 - what kinds of personalization for production?
@@ -305,3 +321,4 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 ### Check pretraining data for WESAD before using a foundation model
 - **Why:** If WESAD was in the pretraining data, the model has seen our test subjects, and LOSO
   results would be optimistic.
+
