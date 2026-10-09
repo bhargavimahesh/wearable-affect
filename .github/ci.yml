@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.19"
+      - name: Install dependencies (without the PyTorch group)
+        run: uv sync --locked --no-group fm
+      - name: Run tests
+        run: uv run --no-group fm pytest
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.19"
+      - name: Install dependencies (for the smoke test)
+        run: uv sync --locked --no-group fm
+      - name: Create the stand-in model
+        run: uv run --no-group fm python scripts/make_ci_model.py artifacts/stress_detector.joblib
+      - name: Build the image
+        run: docker build -t wearable-affect:ci .
+      - name: Start the container
+        run: docker run -d --name api -p 8080:8080 wearable-affect:ci
+      - name: Wait until the API is ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8080/health && exit 0
+            sleep 1
+          done
+          echo "API did not become ready"; docker logs api; exit 1
+      - name: Smoke test
+        run: uv run --no-group fm python scripts/smoke_test_api.py http://127.0.0.1:8080 artifacts/stress_detector.joblib
+      - name: Container logs
+        if: always()
+        run: docker logs api

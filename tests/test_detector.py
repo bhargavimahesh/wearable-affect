@@ -9,19 +9,7 @@ from wearable_affect.features import build_feature_table, features_from_signals
 from wearable_affect.models import make_logreg
 from wearable_affect.personalisation import split_calibration, subtract_baseline
 from wearable_affect.windows import make_windows
-
-
-def fake_signals(seconds: int, seed: int = 0) -> dict[str, np.ndarray]:
-    """Plausible-looking calm wrist signals: a 66 bpm pulse, slowly varying EDA, noise."""
-    rng = np.random.default_rng(seed)
-    t = {name: np.arange(seconds * fs) / fs for name, fs in WRIST_FS.items()}
-    return {
-        "BVP": (np.sin(2 * np.pi * 1.1 * t["BVP"]) + rng.normal(0, 0.05, len(t["BVP"])))[:, None],
-        "EDA": (1.0 + 0.1 * np.sin(2 * np.pi * t["EDA"] / 90) + rng.normal(0, 0.003, len(t["EDA"])))[:, None],
-        "TEMP": (33 + rng.normal(0, 0.01, len(t["TEMP"])))[:, None],
-        "ACC": rng.normal(0, 1, (len(t["ACC"]), 3)),
-    }
-
+from wearable_affect.synthetic import synthetic_signals as fake_signals
 
 def test_five_minutes_give_nine_windows():
     assert len(cut_windows(fake_signals(300))) == 9  # starts at 0, 30, ..., 240 s

@@ -7,8 +7,7 @@ from wearable_affect.api import WristSignals, create_app
 from wearable_affect.detector import StressDetector, cut_windows
 from wearable_affect.features import features_from_signals
 from wearable_affect.models import make_logreg
-from test_detector import fake_signals
-
+from wearable_affect.synthetic import synthetic_signals as fake_signals
 
 def as_json(signals: dict[str, np.ndarray]) -> dict:
     """Signals in the API's request format."""

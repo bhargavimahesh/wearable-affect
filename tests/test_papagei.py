@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-
+torch = pytest.importorskip("torch")  # PaPaGei tests need the optional `fm` group
 from wearable_affect.papagei import WEIGHTS_PATH, embed_windows, load_papagei, preprocess_bvp
 from wearable_affect.windows import Window
 
