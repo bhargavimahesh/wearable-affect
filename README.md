@@ -2,7 +2,7 @@
 
 # wearable-affect
 
-**Personalised stress detection from wrist-worn wearable signals, from evaluation to a containerised, CI-tested API.**
+**Personalised stress detection from wrist-worn wearable signals.**
 
 Using the public [WESAD](https://ubicomp.eti.uni-siegen.de/home/datasets/icmi18/) dataset (Empatica E4 wrist sensor, 15 participants), this project builds a stress detector that is evaluated on people it has never seen, personalised with five minutes of calm data from each new user, checked for probability calibration, and served through a stateless HTTP API in a Docker container that GitHub Actions builds and smoke-tests on every push.
 
