@@ -101,3 +101,7 @@
 - Image built from python:3.11-slim with runtime dependencies only (no dev tools, no PyTorch, no LightGBM).
 - Smoke test against the running container: /health OK, model metadata correct; served probability
   identical to direct detector use (0.068676); single-request latency 114 ms on synthetic signals.
+
+## CI (GitHub Actions)
+- On every push and pull request: tests on a clean runner without PyTorch (PaPaGei tests skipped),
+  then image build with a synthetic stand-in model, container start, and smoke test. Both jobs pass.

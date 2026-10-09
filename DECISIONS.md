@@ -286,6 +286,18 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
 - **Why:** One command checks health, calibration and prediction, and that the API's answer equals the
   detector's. Reusable for the container, CI and the cloud deployment.
 
+### CI with GitHub Actions: tests, then image build and smoke test, on every push and pull request
+- **Why:** Problems surface within minutes on a clean machine, not weeks later on someone else's.
+  The Docker job only runs if the tests pass.
+
+### CI uses a stand-in model trained on synthetic data
+- **Why:** The real model is derived from WESAD and must not be stored in GitHub. CI checks the
+  software (code, dependencies, image, API); the model's quality is established by LOSO evaluation.
+  The real model enters only the deployed image (Step 15), from private storage.
+
+### PyTorch-dependent tests skip when the `fm` group isn't installed
+- **Why:** CI has no GPU, and installing CUDA PyTorch on every run would be slow; the deployed service
+  doesn't use it.
 
 # Lessons
 - When a package is missing even after installing, first verify which python is running. `import sys; print(sys.executable)`
@@ -339,7 +351,7 @@ typically clinical-grade finger PPG, 125 Hz; Ours 64 Hz)
   rank windows well and still give probabilities that are too high or too low.
 - Training and calibration (not personal/baseline calibration but output calibration) are not the same. Training is learning weights for each feature. But calibration decribes the quality of the output and checks whether output probabilites can be taken at face value. A trained model is not always well calibrated. In this case, the logistic regression model is already well calibrated, without needing an extra step such as Platt scaling or isotonic regression. 
 - The 5-minute personal calibration is something else again: it measures a person's calm baseline, not the model's probabilities. So in this project, "calibration" can mean the person's baseline (input), the quality of the probabilities (output), or a correction step for those probabilities.
-  
+- GitHub only finds workflows in .github/workflows/ (dot, plural); with no workflow file, the Actions tab shows template suggestions instead of runs.
 # Questions
 - what kinds of personalization for production?
 - how to know this threshold for a new subject?
